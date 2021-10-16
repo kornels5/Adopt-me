@@ -2,6 +2,7 @@ import React, { useState, useEffect, useContext } from "react";
 import useBreedList from "./useBreedList";
 import Results from "./Results";
 import ThemeContext from "./ThemeContext";
+import Pagination from "./Pagination";
 const ANIMALS = ["bird", "cat", "dog", "rabbit", "reptile"];
 
 const SearchParams = () => {
@@ -11,87 +12,100 @@ const SearchParams = () => {
   const [breed, updateBreed] = useState("");
   const [pets, setPets] = useState([]);
   const [breeds] = useBreedList(animal);
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState(null);
 
   useEffect(() => {
     requestPets();
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [currentPage]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function requestPets() {
     const res = await fetch(
-      `http://pets-v2.dev-apis.com/pets?animal=${animal}&location=${location}&breed=${breed}`
+      `http://pets-v2.dev-apis.com/pets?animal=${animal}&location=${location}&breed=${breed}&page=${currentPage - 1}`
     );
     const json = await res.json();
 
+    setPagination({
+      numberOfResults: json.numberOfResults,
+      startIndex: json.startIndex,
+      endIndex: json.endIndex,
+      hasNext: json.hasNext
+    });
     setPets(json.pets);
   }
 
   return (
-    <div className="search-params">
-      <form
-        onSubmit={e => {
-          e.preventDefault();
-          requestPets();
-        }}
-      >
-        <label htmlFor="location">
-          Location
-          <input
-            id="location"
-            value={location}
-            placeholder="Location"
-            onChange={(e) => updateLocation(e.target.value)}
-          />
-        </label>
-        <label htmlFor="animal">
-          Animal
-          <select
-            id="animal"
-            value={animal}
-            onChange={(e) => updateAnimal(e.target.value)}
-            onBlur={(e) => updateAnimal(e.target.value)}
-          >
-            <option />
-            {ANIMALS.map((animal) => (
-              <option key={animal} value={animal}>
-                {animal}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label htmlFor="breed">
-          Breed
-          <select
-            disabled={!breeds.length}
-            id="breed"
-            value={breed}
-            onChange={(e) => updateBreed(e.target.value)}
-            onBlur={(e) => updateBreed(e.target.value)}
-          >
-            <option />
-            {breeds.map((breed) => (
-              <option key={breed} value={breed}>
-                {breed}
-              </option>
-            ))}
-          </select>
-        </label>
-        <label htmlFor="theme">
-          Theme
-          <select
-            value={theme}
-            onChange={(e) => setTheme(e.target.value)}
-            onBlur={(e) => setTheme(e.target.value)}
-          >
-            <option value="peru">Peru</option>
-            <option value="darkblue">Dark Blue</option>
-            <option value="chartreuse">Chartreuse</option>
-            <option value="mediumorchid">Medium Orchid</option>
-          </select>
-        </label>
-        <button style={{ backgroundColor: theme }}>Submit</button>
-      </form>
-      <Results pets={pets} />
-    </div>
+    <>
+      <div className="search-params">
+        <form
+          onSubmit={e => {
+            e.preventDefault();
+            requestPets();
+          }}
+        >
+          <label htmlFor="location">
+            Location
+            <input
+              id="location"
+              value={location}
+              placeholder="Location"
+              onChange={(e) => updateLocation(e.target.value)}
+            />
+          </label>
+          <label htmlFor="animal">
+            Animal
+            <select
+              id="animal"
+              value={animal}
+              onChange={(e) => updateAnimal(e.target.value)}
+              onBlur={(e) => updateAnimal(e.target.value)}
+            >
+              <option />
+              {ANIMALS.map((animal) => (
+                <option key={animal} value={animal}>
+                  {animal}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label htmlFor="breed">
+            Breed
+            <select
+              disabled={!breeds.length}
+              id="breed"
+              value={breed}
+              onChange={(e) => updateBreed(e.target.value)}
+              onBlur={(e) => updateBreed(e.target.value)}
+            >
+              <option />
+              {breeds.map((breed) => (
+                <option key={breed} value={breed}>
+                  {breed}
+                </option>
+              ))}
+            </select>
+          </label>
+          <label htmlFor="theme">
+            Theme
+            <select
+              value={theme}
+              onChange={(e) => setTheme(e.target.value)}
+              onBlur={(e) => setTheme(e.target.value)}
+            >
+              <option value="peru">Peru</option>
+              <option value="darkblue">Dark Blue</option>
+              <option value="chartreuse">Chartreuse</option>
+              <option value="mediumorchid">Medium Orchid</option>
+            </select>
+          </label>
+          <button style={{ backgroundColor: theme }}>Submit</button>
+        </form>
+        <Results pets={pets} />
+      </div>
+      <div>
+        {pagination && <Pagination pagination={Object.assign({ currentPage }, { ...pagination })} onPageChange={currentPage => setCurrentPage(currentPage)} />}
+      </div>
+    </>
   );
 };
 export default SearchParams;

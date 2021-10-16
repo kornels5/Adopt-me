@@ -5,12 +5,8 @@ import SearchParams from './SearchParams';
 import Details from './Details';
 import ThemeContext from "./ThemeContext";
 
-// top of App function body
-
-// wrap the rest of the app
 const App = () => {
   const theme = useState("darkblue");
-
   return (
     <ThemeContext.Provider value={theme}>
       <div>

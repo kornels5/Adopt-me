@@ -326,3 +326,7 @@ header {
     height: 60px;
   }
 }
+
+.text-bold {
+  font-weight: bold !important;
+}
