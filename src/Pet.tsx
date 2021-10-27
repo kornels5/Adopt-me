@@ -1,6 +1,16 @@
 import { Link } from "react-router-dom";
+import { FunctionComponent } from "react";
 
-const Pet = (props) => {
+interface IProps {
+  name: string;
+  animal: string;
+  breed: string;
+  images: string[];
+  location: string;
+  id: number;
+}
+
+const Pet: FunctionComponent<IProps> = (props) => {
   const { name, animal, breed, images, location, id } = props;
 
   let hero = "http://pets-images.dev-apis.com/pets/none.jpg";
@@ -9,11 +19,11 @@ const Pet = (props) => {
   }
 
   return (
-    <Link to={`/details/${id}`} className="pet">
-      <div className="image-container">
+    <Link to={`/details/${id}`} className="relative block">
+      <div>
         <img src={hero} alt={name} />
       </div>
-      <div className="info">
+      <div className="absolute bottom-0 left-0 bg-gradient-to-tr from-white to-transparent pr-2 pt-2">
         <h1>{name}</h1>
         <h2>{`${animal} — ${breed} — ${location}`}</h2>
       </div>

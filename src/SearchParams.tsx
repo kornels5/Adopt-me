@@ -1,64 +1,70 @@
-import React, { useState, useEffect, useContext } from "react";
+import React, { useState, useEffect, useContext, FunctionComponent } from "react";
 import useBreedList from "./useBreedList";
 import Results from "./Results";
 import ThemeContext from "./ThemeContext";
-import Pagination from "./Pagination";
-const ANIMALS = ["bird", "cat", "dog", "rabbit", "reptile"];
+// import Pagination from "./Pagination";
+import { PetAPIResponse, Animal, Pet } from "./APIResponsesTypes";
 
-const SearchParams = () => {
+const ANIMALS: Animal[] = ["bird", "cat", "dog", "rabbit", "reptile"];
+
+const SearchParams: FunctionComponent = () => {
   const [theme, setTheme] = useContext(ThemeContext);
-  const [animal, updateAnimal] = useState("");
+  const [animal, updateAnimal] = useState("" as Animal);
   const [location, updateLocation] = useState("");
   const [breed, updateBreed] = useState("");
-  const [pets, setPets] = useState([]);
+  const [pets, setPets] = useState([] as Pet[]);
   const [breeds] = useBreedList(animal);
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pagination, setPagination] = useState(null);
+  // const [currentPage, setCurrentPage] = useState(1);
+  // const [pagination, setPagination] = useState(null);
 
   useEffect(() => {
-    requestPets();
-  }, [currentPage]); // eslint-disable-line react-hooks/exhaustive-deps
+    void requestPets();
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function requestPets() {
     const res = await fetch(
-      `http://pets-v2.dev-apis.com/pets?animal=${animal}&location=${location}&breed=${breed}&page=${currentPage - 1}`
+      `http://pets-v2.dev-apis.com/pets?animal=${animal}&location=${location}&breed=${breed}`
     );
-    const json = await res.json();
+    const json = await res.json() as PetAPIResponse;
 
-    setPagination({
-      numberOfResults: json.numberOfResults,
-      startIndex: json.startIndex,
-      endIndex: json.endIndex,
-      hasNext: json.hasNext
-    });
+    // setPagination({
+    //   numberOfResults: json.numberOfResults,
+    //   startIndex: json.startIndex,
+    //   endIndex: json.endIndex,
+    //   hasNext: json.hasNext
+    // });
     setPets(json.pets);
   }
 
   return (
     <>
-      <div className="search-params">
+      <div className="my-0 mx-auto w-11/12">
         <form
+          className="p-10 mb-10 rounded-lg bg-gray-200 shadow-lg flex flex-col justify-center items-center divide-y divide-gray-900"
           onSubmit={e => {
             e.preventDefault();
-            requestPets();
+            void requestPets();
           }}
         >
-          <label htmlFor="location">
+          <label className="search-label" htmlFor="location">
             Location
             <input
+              className="search-control"
               id="location"
               value={location}
               placeholder="Location"
+              type="text"
               onChange={(e) => updateLocation(e.target.value)}
             />
           </label>
-          <label htmlFor="animal">
+          <label className="search-label" htmlFor="animal">
             Animal
             <select
+              className="search-control"
               id="animal"
               value={animal}
-              onChange={(e) => updateAnimal(e.target.value)}
-              onBlur={(e) => updateAnimal(e.target.value)}
+              onChange={(e) => updateAnimal(e.target.value as Animal)}
+              onBlur={(e) => updateAnimal(e.target.value as Animal)}
             >
               <option />
               {ANIMALS.map((animal) => (
@@ -68,9 +74,10 @@ const SearchParams = () => {
               ))}
             </select>
           </label>
-          <label htmlFor="breed">
+          <label className="search-label" htmlFor="breed">
             Breed
             <select
+              className="search-control disabled:opacity-50"
               disabled={!breeds.length}
               id="breed"
               value={breed}
@@ -85,9 +92,10 @@ const SearchParams = () => {
               ))}
             </select>
           </label>
-          <label htmlFor="theme">
+          <label className="search-label" htmlFor="theme">
             Theme
             <select
+              className="search-control"
               value={theme}
               onChange={(e) => setTheme(e.target.value)}
               onBlur={(e) => setTheme(e.target.value)}
@@ -98,13 +106,18 @@ const SearchParams = () => {
               <option value="mediumorchid">Medium Orchid</option>
             </select>
           </label>
-          <button style={{ backgroundColor: theme }}>Submit</button>
+          <button
+            className="rounded px-6 py-2 color text-white hover:opacity-50 border-none"
+            style={{ backgroundColor: theme }}
+          >
+            Submit
+          </button>
         </form>
         <Results pets={pets} />
       </div>
-      <div>
+      {/* <div>
         {pagination && <Pagination pagination={Object.assign({ currentPage }, { ...pagination })} onPageChange={currentPage => setCurrentPage(currentPage)} />}
-      </div>
+      </div> */}
     </>
   );
 };
